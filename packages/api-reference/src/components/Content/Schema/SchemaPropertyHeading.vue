@@ -337,9 +337,19 @@ const flattenedDefaultValue = computed(() => {
       class="property-required">
       required
     </div>
-    <!-- examples -->
+  </div>
+  <!-- examples - moved outside the property-heading div to take a full line -->
+  <div
+    v-if="
+      props.withExamples &&
+      (props.value?.example ||
+        props.value?.examples ||
+        (props.value &&
+          isArraySchema(props.value) &&
+          getResolvedRef(props.value?.items)?.example))
+    "
+    class="property-example-wrapper">
     <SchemaPropertyExamples
-      v-if="props.withExamples"
       :example="
         props.value?.example ||
         (props.value &&
@@ -427,5 +437,12 @@ const flattenedDefaultValue = computed(() => {
 
 .deprecated {
   text-decoration: line-through;
+}
+
+.property-example-wrapper {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 </style>

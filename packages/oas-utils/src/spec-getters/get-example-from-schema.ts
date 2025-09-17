@@ -326,12 +326,23 @@ export const getExampleFromSchema = (
       if (items.anyOf || items.oneOf) {
         const ruleItems = items.anyOf || items.oneOf
         if (ruleItems && ruleItems.length > 0) {
-          const firstItem = ruleItems[0]
-          if (firstItem) {
-            const exampleFromRule = getExampleFromSchema(getResolvedRef(firstItem), options, level + 1, schema)
+          if (items.oneOf) {
+            // For oneOf, include all items in the array
+            const examples = ruleItems.map((item: any) =>
+              getExampleFromSchema(getResolvedRef(item), options, level + 1, schema),
+            )
 
-            return cache(schema, wrapItems ? [{ [itemsXmlTagName]: exampleFromRule }] : [exampleFromRule])
+            return cache(
+              schema,
+              wrapItems ? examples.map((example: any) => ({ [itemsXmlTagName]: example })) : examples,
+            )
           }
+            // For anyOf, use the first item as before
+            const firstItem = ruleItems[0]
+            if (firstItem) {
+              const exampleFromRule = getExampleFromSchema(getResolvedRef(firstItem), options, level + 1, schema)
+              return cache(schema, wrapItems ? [{ [itemsXmlTagName]: exampleFromRule }] : [exampleFromRule])
+            }
         }
       }
     }
@@ -360,10 +371,30 @@ export const getExampleFromSchema = (
     return cache(schema, exampleValues[schema.type])
   }
 
-  const discriminateSchema = schema.oneOf || schema.anyOf
-  // Check if property has the `oneOf` | `anyOf` key
+  const discriminateSchema = schema.anyOf
+  const oneOfSchema = schema.oneOf
+
+  // Check if property has the `oneOf` key
+  if (Array.isArray(oneOfSchema) && oneOfSchema.length > 0) {
+    // Handle oneOf differently by collecting all non-null items
+    const nonNullItems = oneOfSchema.map((item) => getResolvedRef(item)).filter((item) => item.type !== 'null')
+
+    if (nonNullItems.length > 0) {
+      // Always return all examples from oneOf items as an array
+      const results = nonNullItems.map((item) => getExampleFromSchema(item, options, level + 1))
+
+      // Return the array of results directly to preserve the different options
+      // This will show all possible variants in oneOf examples
+      return cache(schema, results)
+    }
+
+    // If all items are null, return null
+    return cache(schema, null)
+  }
+
+  // Check if property has the `anyOf` key
   if (Array.isArray(discriminateSchema) && discriminateSchema.length > 0) {
-    // Find the first non-null type in the oneOf/anyOf array
+    // Find the first non-null type in the anyOf array
     const firstNonNullItem = discriminateSchema.map((item) => getResolvedRef(item)).find((item) => item.type !== 'null')
 
     if (firstNonNullItem) {

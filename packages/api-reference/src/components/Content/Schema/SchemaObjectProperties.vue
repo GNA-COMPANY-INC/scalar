@@ -10,6 +10,7 @@ import { computed } from 'vue'
 import { isTypeObject } from '@/components/Content/Schema/helpers/is-type-object'
 
 import SchemaProperty from './SchemaProperty.vue'
+import SchemaPropertyExamples from './SchemaPropertyExamples.vue'
 
 const {
   schema,
@@ -153,6 +154,15 @@ const getAdditionalPropertiesValue = (
 </script>
 
 <template>
+  <!-- Display example if object has one -->
+  <template v-if="isTypeObject(schema) && schema.example">
+    <div class="object-example">
+      <SchemaPropertyExamples
+        :example="schema.example"
+        :examples="schema.examples" />
+    </div>
+  </template>
+
   <!-- Properties -->
   <template v-if="isTypeObject(schema) && schema.properties">
     <SchemaProperty
@@ -167,7 +177,6 @@ const getAdditionalPropertiesValue = (
       :hideWriteOnly="hideWriteOnly"
       :level
       :name="property"
-      :noncollapsible="true"
       :required="schema.required?.includes(property)"
       :value="getResolvedRef(schema.properties[property])" />
   </template>
@@ -186,7 +195,6 @@ const getAdditionalPropertiesValue = (
       :hideWriteOnly="hideWriteOnly"
       :level
       :name="key"
-      :noncollapsible="true"
       :value="getResolvedRef(property)" />
   </template>
 
@@ -207,3 +215,12 @@ const getAdditionalPropertiesValue = (
       variant="additionalProperties" />
   </template>
 </template>
+
+<style scoped>
+.object-example {
+  padding: 0;
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+}
+</style>

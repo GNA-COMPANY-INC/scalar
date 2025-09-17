@@ -337,7 +337,7 @@ const compositionsToRender = computed(() => {
         :hideWriteOnly="hideWriteOnly"
         :level="level + 1"
         :name="name"
-        :noncollapsible="true"
+        :noncollapsible="noncollapsible"
         :schema="optimizedValue" />
     </div>
 
@@ -357,7 +357,7 @@ const compositionsToRender = computed(() => {
           :hideWriteOnly="hideWriteOnly"
           :level="level + 1"
           :name="name"
-          :noncollapsible="true"
+          :noncollapsible="noncollapsible"
           :schema="getResolvedRef(optimizedValue.items)" />
       </div>
     </template>
@@ -375,7 +375,7 @@ const compositionsToRender = computed(() => {
       :hideWriteOnly="hideWriteOnly"
       :level="level"
       :name="name"
-      :noncollapsible="true"
+      :noncollapsible="noncollapsible"
       :value="getResolvedRef(props.value)!" />
     <SpecificationExtension :value="optimizedValue" />
   </component>

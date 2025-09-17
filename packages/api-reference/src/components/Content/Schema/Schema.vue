@@ -13,6 +13,7 @@ import { isTypeObject } from './helpers/is-type-object'
 import SchemaHeading from './SchemaHeading.vue'
 import SchemaObjectProperties from './SchemaObjectProperties.vue'
 import SchemaProperty from './SchemaProperty.vue'
+import SchemaPropertyExamples from './SchemaPropertyExamples.vue'
 
 const {
   schema,
@@ -103,14 +104,14 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
 <template>
   <Disclosure
     v-if="typeof schema === 'object' && Object.keys(schema).length"
-    v-slot="{}"
-    :defaultOpen="true">
+    v-slot="{ open }"
+    :defaultOpen="noncollapsible">
     <div
       class="schema-card"
       :class="[
         `schema-card--level-${level}`,
-        { 'schema-card--compact': compact, 'schema-card--open': true },
-        { 'border-t': additionalProperties && true },
+        { 'schema-card--compact': compact, 'schema-card--open': open },
+        { 'border-t': additionalProperties && open },
       ]">
       <!-- Schema description -->
       <div
@@ -118,15 +119,26 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
         class="schema-card-description">
         <ScalarMarkdown :value="schemaDescription" />
       </div>
+      <!-- Display example if schema has one -->
+      <div
+        v-if="
+          schema?.example ||
+          (schema?.examples && Object.keys(schema?.examples).length > 0)
+        "
+        class="schema-card-example">
+        <SchemaPropertyExamples
+          :example="schema?.example"
+          :examples="schema?.examples" />
+      </div>
       <div
         class="schema-properties"
         :class="{
-          'schema-properties-open': true,
+          'schema-properties-open': open,
         }">
-        <!-- Toggle to collapse/expand long lists of properties (hidden) -->
+        <!-- Toggle to collapse/expand long lists of properties -->
         <div
           v-if="additionalProperties"
-          v-show="false"
+          v-show="!open"
           class="schema-properties">
           <DisclosureButton
             as="button"
@@ -143,8 +155,8 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
 
         <DisclosureButton
           v-else-if="shouldShowToggle"
-          v-show="false"
-          :as="'div'"
+          v-show="!hideHeading && !(noncollapsible && compact)"
+          :as="noncollapsible ? 'div' : 'button'"
           class="schema-card-title"
           :class="{ 'schema-card-title--compact': compact }"
           :style="{
@@ -154,18 +166,21 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
           <template v-if="compact">
             <ScalarIcon
               class="schema-card-title-icon"
-              :class="{ 'schema-card-title-icon--open': true }"
+              :class="{ 'schema-card-title-icon--open': open }"
               icon="Add"
               size="sm" />
-            <span>
-              {{ schema?.title ?? 'Child Attributes' }}
-            </span>
+            <template v-if="open">
+              Hide {{ schema?.title ?? 'Child Attributes' }}
+            </template>
+            <template v-else>
+              Show {{ schema?.title ?? 'Child Attributes' }}
+            </template>
             <ScreenReader v-if="name">for {{ name }}</ScreenReader>
           </template>
           <template v-else>
             <ScalarIcon
               class="schema-card-title-icon"
-              :class="{ 'schema-card-title-icon--open': true }"
+              :class="{ 'schema-card-title-icon--open': open }"
               icon="Add"
               size="sm" />
             <SchemaHeading
@@ -174,8 +189,9 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
           </template>
         </DisclosureButton>
         <DisclosurePanel
+          v-if="!additionalProperties || open"
           as="ul"
-          :static="true">
+          :static="!shouldShowToggle">
           <!-- Object properties -->
           <SchemaObjectProperties
             v-if="isTypeObject(schema)"
@@ -253,8 +269,15 @@ button.schema-card-title:hover {
 .schema-card-description + .schema-properties {
   width: fit-content;
 }
-.schema-card-description + .schema-properties {
+.schema-card-description + .schema-properties,
+.schema-card-example + .schema-properties {
   margin-top: 8px;
+}
+.schema-card-example {
+  padding: 0;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
 }
 .schema-properties-open.schema-properties,
 .schema-properties-open > .schema-card--open {

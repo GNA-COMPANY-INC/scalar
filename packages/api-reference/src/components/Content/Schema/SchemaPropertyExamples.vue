@@ -14,24 +14,22 @@ const { copyToClipboard } = useClipboard()
 <template>
   <!-- single example (deprecated) -->
   <template v-if="example">
-    <div class="property-example">
-      <button
-        type="button"
-        class="property-example-label">
-        <span>Example</span>
-      </button>
-      <div class="property-example-value-list">
+    <div class="property-example property-example-visible">
+      <div class="property-example-header">
+        <span class="property-example-label">Example</span>
+      </div>
+      <div class="property-example-value-container">
         <button
-          type="button"
           class="property-example-value group"
+          type="button"
           @click="copyToClipboard(String(formatExample(example)))">
           <span>
             {{ formatExample(example) }}
           </span>
           <ScalarIcon
+            class="group-hover:text-c-1 text-c-3 ml-auto min-h-3 min-w-3"
             icon="Clipboard"
-            size="xs"
-            class="group-hover:text-c-1 text-c-3 ml-auto min-h-3 min-w-3" />
+            size="xs" />
         </button>
       </div>
     </div>
@@ -44,26 +42,24 @@ const { copyToClipboard } = useClipboard()
       typeof examples === 'object' &&
       Object.keys(examples).length > 0
     ">
-    <div class="property-example">
-      <button
-        type="button"
-        class="property-example-label">
-        <span>
+    <div class="property-example property-example-visible">
+      <div class="property-example-header">
+        <span class="property-example-label">
           {{ Object.keys(examples).length === 1 ? 'Example' : 'Examples' }}
         </span>
-      </button>
-      <div class="property-example-value-list">
+      </div>
+      <div class="property-example-value-container">
         <button
-          type="button"
-          v-for="(example, key) in examples"
+          v-for="(exampleValue, key) in examples"
           :key="key"
           class="property-example-value group"
-          @click="copyToClipboard(String(formatExample(example)))">
-          <span>{{ formatExample(example) }} </span>
+          type="button"
+          @click="copyToClipboard(String(formatExample(exampleValue)))">
+          <span>{{ formatExample(exampleValue) }} </span>
           <ScalarIcon
+            class="text-c-3 group-hover:text-c-1 ml-auto min-h-3 min-w-3"
             icon="Clipboard"
-            size="xs"
-            class="text-c-3 group-hover:text-c-1 ml-auto min-h-3 min-w-3" />
+            size="xs" />
         </button>
       </div>
     </div>
@@ -77,7 +73,38 @@ const { copyToClipboard } = useClipboard()
   font-size: var(--scalar-mini);
   position: relative;
 }
-.property-example:hover:before {
+
+/* Visible example styles */
+.property-example-visible {
+  border: var(--scalar-border-width) solid var(--scalar-border-color);
+  border-radius: var(--scalar-radius);
+  margin-top: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.property-example-header {
+  background-color: var(--scalar-background-2);
+  padding: 6px 10px;
+  border-bottom: var(--scalar-border-width) solid var(--scalar-border-color);
+}
+
+.property-example-label {
+  color: var(--scalar-color-2);
+  font-weight: var(--scalar-semibold);
+  font-size: var(--scalar-small);
+}
+
+.property-example-value-container {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px;
+  width: 100%;
+}
+
+/* Original tooltip styles (keeping for backwards compatibility) */
+.property-example:not(.property-example-visible):hover:before {
   content: '';
   position: absolute;
   top: 0;
@@ -86,14 +113,19 @@ const { copyToClipboard } = useClipboard()
   height: 20px;
   border-radius: var(--scalar-radius);
 }
-.property-example:hover .property-example-label span {
+
+.property-example:not(.property-example-visible):hover
+  .property-example-label
+  span {
   color: var(--scalar-color-1);
 }
-.property-example-label span {
+
+.property-example:not(.property-example-visible) .property-example-label span {
   color: var(--scalar-color-3);
   position: relative;
   border-bottom: var(--scalar-border-width) dotted currentColor;
 }
+
 .property-example-value {
   font-family: var(--scalar-font-code);
   display: flex;
@@ -101,13 +133,20 @@ const { copyToClipboard } = useClipboard()
   align-items: center;
   width: 100%;
   padding: 6px;
+  background: var(--scalar-background-2);
+  border: var(--scalar-border-width) solid var(--scalar-border-color);
+  border-radius: var(--scalar-radius);
+  margin-bottom: 4px;
 }
+
 .property-example-value span {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal; /* Changed from nowrap to normal to allow wrapping */
+  width: 100%; /* Ensure the span takes full width */
 }
+
 .property-example-value :deep(svg) {
   color: var(--scalar-color-3);
 }
@@ -116,12 +155,8 @@ const { copyToClipboard } = useClipboard()
   color: var(--scalar-color-1);
 }
 
-.property-example-value {
-  background: var(--scalar-background-2);
-  border: var(--scalar-border-width) solid var(--scalar-border-color);
-  border-radius: var(--scalar-radius);
-}
-.property-example-value-list {
+/* Original tooltip value list styles */
+.property-example:not(.property-example-visible) .property-example-value-list {
   position: absolute;
   top: 18px;
   left: 50%;
@@ -139,8 +174,11 @@ const { copyToClipboard } = useClipboard()
   display: none;
   z-index: 10;
 }
-.property-example:hover .property-example-value-list,
-.property-example:focus-within .property-example-value-list {
+
+.property-example:not(.property-example-visible):hover
+  .property-example-value-list,
+.property-example:not(.property-example-visible):focus-within
+  .property-example-value-list {
   display: flex;
 }
 </style>
