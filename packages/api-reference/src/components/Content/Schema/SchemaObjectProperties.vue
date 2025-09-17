@@ -167,6 +167,7 @@ const getAdditionalPropertiesValue = (
       :hideWriteOnly="hideWriteOnly"
       :level
       :name="property"
+      :noncollapsible="true"
       :required="schema.required?.includes(property)"
       :value="getResolvedRef(schema.properties[property])" />
   </template>
@@ -185,6 +186,7 @@ const getAdditionalPropertiesValue = (
       :hideWriteOnly="hideWriteOnly"
       :level
       :name="key"
+      :noncollapsible="true"
       :value="getResolvedRef(property)" />
   </template>
 

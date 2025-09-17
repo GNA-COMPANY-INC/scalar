@@ -103,14 +103,14 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
 <template>
   <Disclosure
     v-if="typeof schema === 'object' && Object.keys(schema).length"
-    v-slot="{ open }"
-    :defaultOpen="noncollapsible">
+    v-slot="{}"
+    :defaultOpen="true">
     <div
       class="schema-card"
       :class="[
         `schema-card--level-${level}`,
-        { 'schema-card--compact': compact, 'schema-card--open': open },
-        { 'border-t': additionalProperties && open },
+        { 'schema-card--compact': compact, 'schema-card--open': true },
+        { 'border-t': additionalProperties && true },
       ]">
       <!-- Schema description -->
       <div
@@ -121,12 +121,12 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
       <div
         class="schema-properties"
         :class="{
-          'schema-properties-open': open,
+          'schema-properties-open': true,
         }">
-        <!-- Toggle to collapse/expand long lists of properties -->
+        <!-- Toggle to collapse/expand long lists of properties (hidden) -->
         <div
           v-if="additionalProperties"
-          v-show="!open"
+          v-show="false"
           class="schema-properties">
           <DisclosureButton
             as="button"
@@ -143,8 +143,8 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
 
         <DisclosureButton
           v-else-if="shouldShowToggle"
-          v-show="!hideHeading && !(noncollapsible && compact)"
-          :as="noncollapsible ? 'div' : 'button'"
+          v-show="false"
+          :as="'div'"
           class="schema-card-title"
           :class="{ 'schema-card-title--compact': compact }"
           :style="{
@@ -154,21 +154,18 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
           <template v-if="compact">
             <ScalarIcon
               class="schema-card-title-icon"
-              :class="{ 'schema-card-title-icon--open': open }"
+              :class="{ 'schema-card-title-icon--open': true }"
               icon="Add"
               size="sm" />
-            <template v-if="open">
-              Hide {{ schema?.title ?? 'Child Attributes' }}
-            </template>
-            <template v-else>
-              Show {{ schema?.title ?? 'Child Attributes' }}
-            </template>
+            <span>
+              {{ schema?.title ?? 'Child Attributes' }}
+            </span>
             <ScreenReader v-if="name">for {{ name }}</ScreenReader>
           </template>
           <template v-else>
             <ScalarIcon
               class="schema-card-title-icon"
-              :class="{ 'schema-card-title-icon--open': open }"
+              :class="{ 'schema-card-title-icon--open': true }"
               icon="Add"
               size="sm" />
             <SchemaHeading
@@ -177,9 +174,8 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
           </template>
         </DisclosureButton>
         <DisclosurePanel
-          v-if="!additionalProperties || open"
           as="ul"
-          :static="!shouldShowToggle">
+          :static="true">
           <!-- Object properties -->
           <SchemaObjectProperties
             v-if="isTypeObject(schema)"
