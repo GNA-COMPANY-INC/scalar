@@ -18,6 +18,7 @@ import { compositions } from './helpers/schema-composition'
 import Schema from './Schema.vue'
 import SchemaComposition from './SchemaComposition.vue'
 import SchemaEnumValues from './SchemaEnumValues.vue'
+import SchemaPropertyExamples from './SchemaPropertyExamples.vue'
 import SchemaPropertyHeading from './SchemaPropertyHeading.vue'
 
 /**
@@ -305,12 +306,39 @@ const compositionsToRender = computed(() => {
       v-if="displayDescription"
       class="property-description">
       <ScalarMarkdown :value="displayDescription" />
+
+      <!-- Example below description -->
+      <div
+        v-if="optimizedValue?.example || optimizedValue?.examples"
+        class="property-example-container">
+        <SchemaPropertyExamples
+          :example="optimizedValue?.example"
+          :examples="optimizedValue?.examples" />
+      </div>
     </div>
     <div
       v-else-if="generatePropertyDescription(optimizedValue)"
       class="property-description">
       <ScalarMarkdown
         :value="generatePropertyDescription(optimizedValue) || ''" />
+
+      <!-- Example below generated description -->
+      <div
+        v-if="optimizedValue?.example || optimizedValue?.examples"
+        class="property-example-container">
+        <SchemaPropertyExamples
+          :example="optimizedValue?.example"
+          :examples="optimizedValue?.examples" />
+      </div>
+    </div>
+
+    <!-- Example with no description -->
+    <div
+      v-else-if="optimizedValue?.example || optimizedValue?.examples"
+      class="property-example-standalone">
+      <SchemaPropertyExamples
+        :example="optimizedValue?.example"
+        :examples="optimizedValue?.examples" />
     </div>
 
     <!-- Enum -->
@@ -462,8 +490,19 @@ const compositionsToRender = computed(() => {
 }
 
 .property-description + .children,
-.children + .property-rule {
+.children + .property-rule,
+.property-example-standalone + .children,
+.property-example-standalone + .property-rule {
   margin-top: 9px;
+}
+
+.property-example-container {
+  margin-top: 8px;
+}
+
+.property-example-standalone {
+  margin-top: 6px;
+  margin-bottom: 6px;
 }
 
 .children {

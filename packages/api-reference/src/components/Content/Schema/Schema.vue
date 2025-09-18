@@ -118,10 +118,22 @@ const handleClick = (e: MouseEvent) => noncollapsible && e.stopPropagation()
         v-if="schemaDescription"
         class="schema-card-description">
         <ScalarMarkdown :value="schemaDescription" />
+
+        <!-- Display example if schema has one - moved below description -->
+        <div
+          v-if="
+            schema?.example ||
+            (schema?.examples && Object.keys(schema?.examples).length > 0)
+          "
+          class="schema-card-example">
+          <SchemaPropertyExamples
+            :example="schema?.example"
+            :examples="schema?.examples" />
+        </div>
       </div>
-      <!-- Display example if schema has one -->
+      <!-- Display example if schema has one but no description -->
       <div
-        v-if="
+        v-else-if="
           schema?.example ||
           (schema?.examples && Object.keys(schema?.examples).length > 0)
         "
@@ -275,9 +287,9 @@ button.schema-card-title:hover {
 }
 .schema-card-example {
   padding: 0;
-  display: flex;
-  justify-content: flex-start;
+  display: block;
   width: 100%;
+  margin-top: 8px;
 }
 .schema-properties-open.schema-properties,
 .schema-properties-open > .schema-card--open {

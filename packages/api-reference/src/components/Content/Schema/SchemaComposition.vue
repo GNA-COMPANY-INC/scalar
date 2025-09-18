@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { type ScalarListboxOption } from '@scalar/components'
+import { ScalarListbox, type ScalarListboxOption } from '@scalar/components'
 import { isDefined } from '@scalar/helpers/array/is-defined'
+import { ScalarIconCaretDown } from '@scalar/icons'
 import { getResolvedRef } from '@scalar/workspace-store/helpers/get-resolved-ref'
 import type {
   DiscriminatorObject,
   SchemaObject,
 } from '@scalar/workspace-store/schemas/v3.1/strict/openapi-document'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { getSchemaType } from './helpers/get-schema-type'
 import { mergeAllOfSchemas } from './helpers/merge-all-of-schemas'
@@ -62,6 +63,12 @@ const listboxOptions = computed((): ScalarListboxOption[] =>
 )
 
 /**
+ * Two-way computed property for the selected option.
+ * Handles conversion between the selected index and the listbox option format.
+ */
+const selectedOption = ref<ScalarListboxOption>(listboxOptions.value[0])
+
+/**
  * Humanize composition keyword name for display.
  * Converts camelCase to Title Case (e.g., oneOf -> One of).
  */
@@ -71,6 +78,11 @@ const humanizeType = (type: CompositionKeyword): string =>
     .replace(/^./, (str) => str.toUpperCase())
     .toLowerCase()
     .replace(/^(\w)/, (c) => c.toUpperCase())
+
+/** Inside the currently selected composition */
+const selectedComposition = computed(
+  () => composition.value[Number(selectedOption.value.id)].value,
+)
 </script>
 
 <template>
@@ -90,25 +102,33 @@ const humanizeType = (type: CompositionKeyword): string =>
       :schema="mergeAllOfSchemas(props.value)" />
 
     <template v-else>
-      <!-- Display composition type header -->
-      <div
-        class="composition-header bg-b-1.5 flex w-full items-center gap-1 rounded-t-lg border border-b-0 px-2 py-1.25 pr-3 text-left">
-        <span class="text-c-2">{{ humanizeType(props.composition) }}</span>
-      </div>
-
-      <!-- Render all schemas in the composition -->
-      <div
-        v-for="(schema, index) in composition"
-        :key="index"
-        class="composition-panel">
-        <div class="schema-label text-c-1 border-b px-2 py-1">
-          {{ listboxOptions[index]?.label || 'Schema' }}
+      <!-- Composition selector and panel for nested compositions -->
+      <ScalarListbox
+        v-model="selectedOption"
+        :options="listboxOptions"
+        resize>
+        <button
+          class="composition-selector bg-b-1.5 hover:bg-b-2 flex w-full cursor-pointer items-center gap-1 rounded-t-lg border border-b-0 px-2 py-1.25 pr-3 text-left"
+          type="button">
+          <span class="text-c-2">{{ humanizeType(props.composition) }}</span>
           <span
-            v-if="schema.value?.deprecated"
-            class="text-red"
-            >deprecated</span
-          >
-        </div>
+            class="composition-selector-label text-c-1"
+            :class="{
+              'line-through': selectedComposition?.deprecated,
+            }">
+            {{ selectedOption?.label || 'Schema' }}
+          </span>
+          <div
+            v-if="selectedComposition?.deprecated"
+            class="text-red">
+            deprecated
+          </div>
+          <ScalarIconCaretDown />
+        </button>
+      </ScalarListbox>
+
+      <div class="composition-panel">
+        <!-- Render the selected schema if it has content to display -->
         <Schema
           :breadcrumb="breadcrumb"
           :compact="compact"
@@ -119,7 +139,7 @@ const humanizeType = (type: CompositionKeyword): string =>
           :level="level + 1"
           :name="name"
           :noncollapsible="true"
-          :schema="schema.value" />
+          :schema="selectedComposition" />
       </div>
     </template>
   </div>

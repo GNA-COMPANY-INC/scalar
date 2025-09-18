@@ -16,7 +16,6 @@ import { getSchemaType } from './helpers/get-schema-type'
 import { getModelName } from './helpers/schema-name'
 import RenderString from './RenderString.vue'
 import SchemaPropertyDetail from './SchemaPropertyDetail.vue'
-import SchemaPropertyExamples from './SchemaPropertyExamples.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -25,13 +24,11 @@ const props = withDefaults(
     isDiscriminator?: boolean
     required?: boolean
     additional?: boolean
-    withExamples?: boolean
     hideModelNames?: boolean
   }>(),
   {
     isDiscriminator: false,
     required: false,
-    withExamples: true,
     hideModelNames: false,
   },
 )
@@ -337,26 +334,6 @@ const flattenedDefaultValue = computed(() => {
       class="property-required">
       required
     </div>
-  </div>
-  <!-- examples - moved outside the property-heading div to take a full line -->
-  <div
-    v-if="
-      props.withExamples &&
-      (props.value?.example ||
-        props.value?.examples ||
-        (props.value &&
-          isArraySchema(props.value) &&
-          getResolvedRef(props.value?.items)?.example))
-    "
-    class="property-example-wrapper">
-    <SchemaPropertyExamples
-      :example="
-        props.value?.example ||
-        (props.value &&
-          isArraySchema(props.value) &&
-          getResolvedRef(props.value?.items)?.example)
-      "
-      :examples="props.value?.examples" />
   </div>
 </template>
 <style scoped>

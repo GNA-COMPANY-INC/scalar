@@ -145,6 +145,7 @@ const { copyToClipboard } = useClipboard()
   text-overflow: ellipsis;
   white-space: normal; /* Changed from nowrap to normal to allow wrapping */
   width: 100%; /* Ensure the span takes full width */
+  text-align: left; /* Left-align the text */
 }
 
 .property-example-value :deep(svg) {
